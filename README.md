@@ -1,6 +1,6 @@
-# AddSol ☀️
+# Solana Faucet Tool ☀️
 
-**AddSol** é um utilitário de linha de comando (CLI) simples e eficiente desenvolvido em Rust para automatizar a geração de novas contas na blockchain Solana e solicitar fundos de teste na Devnet.
+**Solana Faucet Tool** é um utilitário de linha de comando (CLI) simples e eficiente desenvolvido em Rust para automatizar a geração de novas contas na blockchain Solana e solicitar fundos de teste na Devnet.
 
 ---
 
