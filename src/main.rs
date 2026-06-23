@@ -15,19 +15,30 @@ fn main() -> Result<(), Box<dyn Error>>{
     let rpc_client = RpcClient::new(rpc_url);
 
     //gerando keypair nova
+
+    println!("welcome to faucet tool!");
+
+    println!("how many lamports/sol you want recive? (1_000_000_00 = 1 sol 1_500_000_000 = 1.5 sol)");
+    get_amount_in_lamports();
+
+    println!("you choose {}", amount_in_lamports);
+
+    println!("Do you want to use an existing wallet or create a new one?");
+    println!("1 - Create new account");
+    println!("2 - Use existing account");
+    println!("3 - Exit");
+    println!("--------------------------- ");
+
+    let decision = get_user_input();
+
+    match decision {
+        1 => create_keypair(amount_in_lamports, rpc_client);
+        2 => use_existing_keypair(amount_in_lamports, rpc_client);
+        3 => exit();
+        _ => println!("Opção inválida")
+    }
+
     
-    let keypair = Keypair::new();
-    let public_key = keypair.pubkey();
-
-    println!("Nova conta criada");
-    println!("Endereço público: {}", public_key);
-
-    //solicitando SOL da faucet na devnet
-    let amount_in_lamports = 2_000_000_00; //1 SOL = 1_000_000_000 lamports   2_000_000_00
-    rpc_client.request_airdrop(&public_key, amount_in_lamports)?;
-
-    println!("Solicitção de {} lamports enviada para o endereço {}",
-    amount_in_lamports, public_key);
 
     Ok(())
 }
