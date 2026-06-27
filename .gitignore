@@ -1,4 +1,4 @@
-
+Cargo.lock
 # Ignora diretórios de builds (em qualquer lugar do projeto)
 **/target/
 
