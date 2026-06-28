@@ -19,13 +19,14 @@ fn main() {
         }
     };
 
-    //request ammount of lamports/sol from user
+    //request ammount of SOL from user
     println!(
-        "how many lamports/sol you want recive? (1_000_000_00 = 1 sol 1_500_000_000 = 1.5 sol)"
+        "how many SOL do you want to receive? (e.g. 1 or 1.5)"
     );
-    let ammount_in_lamports = get_insert_u64();
+    let ammount_in_sol = get_insert_f64();
+    let ammount_in_lamports = (ammount_in_sol * 1_000_000_000.0) as u64;
 
-    println!("you choose {}", ammount_in_lamports);
+    println!("you choose {} SOL ({} lamports)", ammount_in_sol, ammount_in_lamports);
 
     println!("Do you want to use an existing wallet or create a new one?");
     println!("1 - Create new account");
