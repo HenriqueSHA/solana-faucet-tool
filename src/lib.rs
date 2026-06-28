@@ -79,10 +79,14 @@ pub mod system_transaction {
 }
 
 pub fn airdrop_sol(pubkey: &Pubkey, ammount_in_lamports: u64, rpc_client: &RpcClient) {
-    let sig = rpc_client
-        .request_airdrop(pubkey, ammount_in_lamports)
-        .unwrap();
-    let confirmed = rpc_client.confirm_transaction(&sig).unwrap(); //dizer se a transação foi confirmada ou não 
+    let sig = match rpc_client.request_airdrop(pubkey, ammount_in_lamports) {
+        Ok(signature) => signature,
+        Err(e) => {
+            println!("Erro ao solicitar airdrop: {:?}", e);
+            std::process::exit(1);
+        }
+    };
+    let confirmed = rpc_client.confirm_transaction(&sig).unwrap_or(false); //dizer se a transação foi confirmada ou não 
     println!("Transaction confirmed: {:?}", confirmed);
     if confirmed {
         println!("Airdrop successful!");
@@ -92,7 +96,13 @@ pub fn airdrop_sol(pubkey: &Pubkey, ammount_in_lamports: u64, rpc_client: &RpcCl
 }
 
 pub fn get_balance(pubkey: Pubkey, rpc_client: &RpcClient) -> u64 {
-    rpc_client.get_balance(&pubkey).unwrap()
+    match rpc_client.get_balance(&pubkey) {
+        Ok(balance) => balance,
+        Err(e) => {
+            println!("Erro ao obter saldo: {:?}", e);
+            std::process::exit(1);
+        }
+    }
 }
 
 pub fn create_new_wallet(_ammount_in_lamports: u64, _rpc_client: &RpcClient) -> Pubkey {
@@ -106,7 +116,13 @@ pub fn use_existing_wallet(_ammount_in_lamports: u64, rpc_client: &RpcClient) ->
     println!("insert your public key to recive the {_ammount_in_lamports}", _ammount_in_lamports = _ammount_in_lamports);
 
     let pubkey = get_insert_string();
-    let pubkey_addres = Pubkey::from_str(&pubkey).unwrap();
+    let pubkey_addres = match Pubkey::from_str(&pubkey) {
+        Ok(addr) => addr,
+        Err(_) => {
+            println!("Erro: Chave pública inválida!");
+            std::process::exit(1);
+        }
+    };
 
     let balance = get_balance(pubkey_addres, rpc_client);
     println!("your balance is {balance} lamports");

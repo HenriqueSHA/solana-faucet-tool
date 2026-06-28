@@ -1,12 +1,6 @@
 use solana_faucet_tool::*;
 
 fn main() {
-    //config rpc client
-
-    let mut decision = String::new();
-    let mut pubkey = Pubkey::default();
-    let mut ammount_in_lamports: u64 = 0;
-
     println!("welcome to faucet tool!");
 
     println!("wich network you want to use?");
@@ -14,9 +8,9 @@ fn main() {
     println!("2 - Localhost");
     println!("--------------------------- ");
 
-    decision = get_insert_string();
+    let network_decision = get_insert_string();
 
-    let rpc_client = match decision.as_str() {
+    let rpc_client = match network_decision.as_str() {
         "1" => RpcClient::new("https://api.devnet.solana.com"),
         "2" => RpcClient::new("http://localhost:8899"),
         _ => {
@@ -26,11 +20,10 @@ fn main() {
     };
 
     //request ammount of lamports/sol from user
-
     println!(
         "how many lamports/sol you want recive? (1_000_000_00 = 1 sol 1_500_000_000 = 1.5 sol)"
     );
-    ammount_in_lamports = get_insert_u64();
+    let ammount_in_lamports = get_insert_u64();
 
     println!("you choose {}", ammount_in_lamports);
 
@@ -40,15 +33,11 @@ fn main() {
     println!("3 - Exit");
     println!("--------------------------- ");
 
-    decision = get_insert_string();
+    let wallet_decision = get_insert_string();
 
-    match decision.as_str() {
-        "1" => {
-            pubkey = create_new_wallet(ammount_in_lamports, &rpc_client);
-        }
-        "2" => {
-            pubkey = use_existing_wallet(ammount_in_lamports, &rpc_client);
-        }
+    let pubkey = match wallet_decision.as_str() {
+        "1" => create_new_wallet(ammount_in_lamports, &rpc_client),
+        "2" => use_existing_wallet(ammount_in_lamports, &rpc_client),
         "3" => {
             std::process::exit(0);
         }
@@ -56,10 +45,14 @@ fn main() {
             println!("Opção inválida");
             std::process::exit(1);
         }
-    }
+    };
 
-    let balance = get_balance(pubkey, &rpc_client);
-    println!("your balance is {} lamports", balance);
+    let balance_before = get_balance(pubkey, &rpc_client);
+    println!("your balance before airdrop is {} lamports", balance_before);
 
+    println!("Requesting airdrop...");
     airdrop_sol(&pubkey, ammount_in_lamports, &rpc_client);
+
+    let balance_after = get_balance(pubkey, &rpc_client);
+    println!("your balance after airdrop is {} lamports", balance_after);
 }
