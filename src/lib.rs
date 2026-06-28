@@ -55,6 +55,7 @@ pub use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::Transaction,
 };
+pub use solana_commitment_config::CommitmentConfig;
 
 pub mod system_transaction {
     use super::*;
@@ -86,7 +87,20 @@ pub fn airdrop_sol(pubkey: &Pubkey, ammount_in_lamports: u64, rpc_client: &RpcCl
             std::process::exit(1);
         }
     };
-    let confirmed = rpc_client.confirm_transaction(&sig).unwrap_or(false); //dizer se a transação foi confirmada ou não 
+
+    let mut confirmed = false;
+    for _ in 0..20 {
+        if let Ok(response) = rpc_client.get_signature_statuses(&[sig]) {
+            if let Some(Some(status)) = response.value.first() {
+                if status.err.is_none() {
+                    confirmed = true;
+                    break;
+                }
+            }
+        }
+        std::thread::sleep(std::time::Duration::from_millis(500));
+    }
+
     println!("Transaction confirmed: {:?}", confirmed);
     if confirmed {
         println!("Airdrop successful!");

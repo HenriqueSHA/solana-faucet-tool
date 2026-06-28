@@ -11,8 +11,8 @@ fn main() {
     let network_decision = get_insert_string();
 
     let rpc_client = match network_decision.as_str() {
-        "1" => RpcClient::new("https://api.devnet.solana.com"),
-        "2" => RpcClient::new("http://localhost:8899"),
+        "1" => RpcClient::new_with_commitment("https://api.devnet.solana.com", CommitmentConfig::confirmed()),
+        "2" => RpcClient::new_with_commitment("http://localhost:8899", CommitmentConfig::confirmed()),
         _ => {
             println!("Opção inválida");
             std::process::exit(1);
