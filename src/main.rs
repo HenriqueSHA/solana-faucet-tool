@@ -4,8 +4,8 @@ fn main() {
     //config rpc client
 
     let mut decision = String::new();
-
-    let mut ammount_in_lamports = String::new();
+    let mut pubkey = Pubkey::default();
+    let mut ammount_in_lamports: u64 = 0;
 
     println!("welcome to faucet tool!");
 
@@ -13,12 +13,10 @@ fn main() {
     println!("1 - Devnet");
     println!("2 - Localhost");
     println!("--------------------------- ");
-    io::stdin()
-        .read_line(&mut decision)
-        .expect("Failed to read line");
-    let decision = decision.trim();
 
-    let rpc_client = match decision {
+    decision = get_insert_string();
+
+    let rpc_client = match decision.as_str() {
         "1" => RpcClient::new("https://api.devnet.solana.com"),
         "2" => RpcClient::new("http://localhost:8899"),
         _ => {
@@ -32,10 +30,7 @@ fn main() {
     println!(
         "how many lamports/sol you want recive? (1_000_000_00 = 1 sol 1_500_000_000 = 1.5 sol)"
     );
-    io::stdin()
-        .read_line(&mut ammount_in_lamports)
-        .expect("Failed to read line");
-    let mut ammount_in_lamports = ammount_in_lamports.trim();
+    ammount_in_lamports = get_insert_u64();
 
     println!("you choose {}", ammount_in_lamports);
 
@@ -45,12 +40,14 @@ fn main() {
     println!("3 - Exit");
     println!("--------------------------- ");
 
-    match decision {
+    decision = get_insert_string();
+
+    match decision.as_str() {
         "1" => {
-            create_new_wallet(ammount_in_lamports, rpc_client);
+            pubkey = create_new_wallet(ammount_in_lamports, &rpc_client);
         }
         "2" => {
-            use_existing_wallet(ammount_in_lamports, rpc_client);
+            pubkey = use_existing_wallet(ammount_in_lamports, &rpc_client);
         }
         "3" => {
             std::process::exit(0);
@@ -60,4 +57,9 @@ fn main() {
             std::process::exit(1);
         }
     }
+
+    let balance = get_balance(pubkey, &rpc_client);
+    println!("your balance is {} lamports", balance);
+
+    airdrop_sol(&pubkey, ammount_in_lamports, &rpc_client);
 }

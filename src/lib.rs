@@ -1,5 +1,4 @@
 pub use solana_client::rpc_client::RpcClient;
-pub use std::error::Error;
 pub use std::io;
 use std::str::FromStr;
 
@@ -15,6 +14,16 @@ pub fn get_insert_u8() -> u8 {
     loop {
         let input = get_insert_string();
         match input.parse::<u8>() {
+            Ok(num) => return num,
+            Err(_) => println!("Please enter a valid integer between 0 and 255:"),
+        }
+    }
+}
+
+pub fn get_insert_u64() -> u64 {
+    loop {
+        let input = get_insert_string();
+        match input.parse::<u64>() {
             Ok(num) => return num,
             Err(_) => println!("Please enter a valid integer between 0 and 255:"),
         }
@@ -43,7 +52,7 @@ pub fn get_insert_f64() -> f64 {
 
 pub use solana_sdk::{
     pubkey::Pubkey,
-    signature::{Keypair, Signature, Signer},
+    signature::{Keypair, Signer},
     transaction::Transaction,
 };
 
@@ -69,29 +78,38 @@ pub mod system_transaction {
     }
 }
 
-pub fn get_balance(pubkey: String, rpc_client: RpcClient) -> u64 {
-    let pubkey = Pubkey::new_from_string(&pubkey);
-    let balance = rpc_client.get_balance(&pubkey).unwrap();
-    balance
+pub fn airdrop_sol(pubkey: &Pubkey, ammount_in_lamports: u64, rpc_client: &RpcClient) {
+    let sig = rpc_client
+        .request_airdrop(pubkey, ammount_in_lamports)
+        .unwrap();
+    let confirmed = rpc_client.confirm_transaction(&sig).unwrap(); //dizer se a transação foi confirmada ou não 
+    println!("Transaction confirmed: {:?}", confirmed);
+    if confirmed {
+        println!("Airdrop successful!");
+    } else {
+        println!("Airdrop failed!");
+    }
 }
 
-pub fn create_new_wallet(ammount_in_lamports: u64, rpc_client: RpcClient) {
+pub fn get_balance(pubkey: Pubkey, rpc_client: &RpcClient) -> u64 {
+    rpc_client.get_balance(&pubkey).unwrap()
+}
+
+pub fn create_new_wallet(_ammount_in_lamports: u64, _rpc_client: &RpcClient) -> Pubkey {
     let keypair = Keypair::new();
     println!("New wallet created: {:?}", keypair.pubkey());
+
+    return keypair.pubkey();
 }
 
-pub fn use_existing_wallet(ammount_in_lamports: u64, rpc_client: RpcClient) {
-    println!(
-        "insert your public key to recive the {ammount_in_lamports}",
-        ammount_in_lamports
-    );
+pub fn use_existing_wallet(_ammount_in_lamports: u64, rpc_client: &RpcClient) -> Pubkey {
+    println!("insert your public key to recive the {_ammount_in_lamports}", _ammount_in_lamports = _ammount_in_lamports);
 
     let pubkey = get_insert_string();
+    let pubkey_addres = Pubkey::from_str(&pubkey).unwrap();
 
-    let balance = rpc_client
-        .get_balance(&pubkey)
-        .expect("Failed to get balance");
-
-    let balance = get_balance(pubkey, rpc_client);
+    let balance = get_balance(pubkey_addres, rpc_client);
     println!("your balance is {balance} lamports");
+
+    return pubkey_addres;
 }
